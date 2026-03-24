@@ -363,12 +363,12 @@ body::after {
   font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase;
   padding:0.5rem 1.1rem; border-radius:2px; cursor:pointer;
   transition:all 0.3s; text-decoration:none; display:inline-block;
-  white-space:nowrap;
+  white-space:nowrap; border:1px solid;
 }
 
 .planning-btn-primary {
   background:var(--gold); color:var(--night);
-  border:1px solid var(--gold);
+  border-color:var(--gold);
 }
 .planning-btn-primary:hover {
   background:var(--gold2); border-color:var(--gold2);
@@ -376,10 +376,79 @@ body::after {
 
 .planning-btn-secondary {
   background:transparent; color:var(--muted);
-  border:1px solid var(--line);
+  border-color:var(--line);
 }
 .planning-btn-secondary:hover {
   border-color:var(--gold); color:var(--gold);
+}
+
+/* Iframe popup */
+.iframe-overlay {
+  position:fixed; inset:0; z-index:700;
+  background:rgba(5,8,16,0.9);
+  display:none; align-items:center; justify-content:center;
+  padding:2rem;
+}
+.iframe-overlay.visible { display:flex; }
+
+.iframe-container {
+  width:100%; max-width:1100px; height:85vh;
+  background:var(--forest); border:1px solid var(--line);
+  display:flex; flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+
+.iframe-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.8rem 1.2rem;
+  border-bottom:1px solid var(--line);
+  background:var(--moss);
+}
+
+.iframe-title {
+  font-family:'Cormorant',serif; font-size:1rem;
+  color:var(--gold2); font-weight:400;
+}
+
+.iframe-actions {
+  display:flex; gap:0.6rem; align-items:center;
+}
+
+.iframe-btn {
+  font-family:'Raleway',sans-serif; font-weight:400;
+  font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase;
+  padding:0.35rem 0.8rem; border-radius:2px; cursor:pointer;
+  transition:all 0.3s; background:none;
+  color:var(--muted); border:1px solid var(--line);
+}
+.iframe-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+.iframe-close {
+  font-size:1.2rem; background:none; border:none;
+  color:var(--muted); cursor:pointer; padding:0.2rem 0.5rem;
+  transition:color 0.3s; line-height:1;
+}
+.iframe-close:hover { color:var(--red); }
+
+.iframe-body {
+  flex:1; overflow:hidden;
+}
+
+.iframe-body iframe {
+  width:100%; height:100%; border:none;
+  background:#fff;
+}
+
+.iframe-loading {
+  display:flex; align-items:center; justify-content:center;
+  height:100%; color:var(--muted); font-size:0.8rem;
+  font-family:'Raleway',sans-serif;
+}
+
+.iframe-loading .loader {
+  width:20px; height:20px; border:2px solid var(--line);
+  border-top-color:var(--gold); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin-right:0.8rem;
 }
 
 /* Bookings list */
@@ -967,10 +1036,10 @@ body::after {
         </div>
       </div>
       <div class="planning-actions">
-        <a href="https://app.cal.eu/availability" target="_blank" rel="noopener" class="planning-btn planning-btn-primary">Disponibilités</a>
-        <a href="https://app.cal.eu/event-types" target="_blank" rel="noopener" class="planning-btn planning-btn-secondary">Types d'événements</a>
-        <a href="https://app.cal.eu/bookings/upcoming" target="_blank" rel="noopener" class="planning-btn planning-btn-secondary">Mes RDV Cal.eu</a>
-        <a href="https://app.cal.eu/settings/my-account/profile" target="_blank" rel="noopener" class="planning-btn planning-btn-secondary">Paramètres</a>
+        <button onclick="openCalPopup('https://app.cal.eu/availability','Disponibilités')" class="planning-btn planning-btn-primary">Disponibilités</button>
+        <button onclick="openCalPopup('https://app.cal.eu/event-types','Types d\'\u00e9v\u00e9nements')" class="planning-btn planning-btn-secondary">Types d'événements</button>
+        <button onclick="openCalPopup('https://app.cal.eu/bookings/upcoming','Mes RDV Cal.eu')" class="planning-btn planning-btn-secondary">Mes RDV Cal.eu</button>
+        <button onclick="openCalPopup('https://app.cal.eu/settings/my-account/profile','Paramètres')" class="planning-btn planning-btn-secondary">Paramètres</button>
       </div>
     </div>
 
@@ -1052,6 +1121,22 @@ body::after {
   <footer class="admin-footer">
     <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
   </footer>
+</div>
+
+<!-- Iframe Popup -->
+<div class="iframe-overlay" id="iframe-overlay" onclick="if(event.target===this)closeCalPopup()">
+  <div class="iframe-container">
+    <div class="iframe-header">
+      <span class="iframe-title" id="iframe-title">Cal.eu</span>
+      <div class="iframe-actions">
+        <button class="iframe-btn" id="iframe-newtab" onclick="openInNewTab()">Ouvrir dans un onglet</button>
+        <button class="iframe-close" onclick="closeCalPopup()">&times;</button>
+      </div>
+    </div>
+    <div class="iframe-body" id="iframe-body">
+      <div class="iframe-loading" id="iframe-loading"><div class="loader"></div>Chargement de Cal.eu…</div>
+    </div>
+  </div>
 </div>
 
 <!-- Confirmation Modal -->
@@ -1607,6 +1692,77 @@ let searchTimeout;
 document.getElementById('filter-search').addEventListener('input', function() {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(applyFilters, 300);
+});
+
+/* ═══════════════════════════════════════
+   CAL.EU IFRAME POPUP
+   ═══════════════════════════════════════ */
+
+let currentCalUrl = '';
+
+function openCalPopup(url, title) {
+  currentCalUrl = url;
+  document.getElementById('iframe-title').textContent = title;
+  const body = document.getElementById('iframe-body');
+  // Show loading, then insert iframe
+  body.innerHTML = '<div class="iframe-loading" id="iframe-loading"><div class="loader"></div>Chargement de Cal.eu…</div>';
+  document.getElementById('iframe-overlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+
+  // Create iframe after a small delay for smooth animation
+  setTimeout(() => {
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.display = 'none';
+    iframe.onload = function() {
+      const loader = document.getElementById('iframe-loading');
+      if (loader) loader.remove();
+      iframe.style.display = 'block';
+    };
+    // If iframe blocked by X-Frame-Options, fallback to new tab
+    iframe.onerror = function() {
+      closeCalPopup();
+      window.open(url, '_blank');
+    };
+    body.appendChild(iframe);
+
+    // Fallback: if still loading after 5s, show iframe anyway (some sites don't fire onload properly)
+    setTimeout(() => {
+      const loader = document.getElementById('iframe-loading');
+      if (loader) loader.remove();
+      iframe.style.display = 'block';
+    }, 5000);
+  }, 100);
+}
+
+function closeCalPopup() {
+  const overlay = document.getElementById('iframe-overlay');
+  overlay.classList.remove('visible');
+  document.body.style.overflow = '';
+  // Clean up iframe
+  const body = document.getElementById('iframe-body');
+  body.innerHTML = '';
+  currentCalUrl = '';
+}
+
+function openInNewTab() {
+  if (currentCalUrl) window.open(currentCalUrl, '_blank');
+  closeCalPopup();
+}
+
+// Close popup with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const iframeOverlay = document.getElementById('iframe-overlay');
+    if (iframeOverlay.classList.contains('visible')) {
+      closeCalPopup();
+      return;
+    }
+    const actionModal = document.getElementById('action-modal');
+    if (actionModal.classList.contains('visible')) {
+      closeModal();
+    }
+  }
 });
 
 /* ═══════════════════════════════════════
