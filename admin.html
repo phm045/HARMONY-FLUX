@@ -1823,14 +1823,18 @@ async function loadPrices() {
   statusEl.className = 'pricing-status';
 
   try {
-    // Fetch from GitHub API to get the sha (needed for update)
-    const resp = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + PRICES_PATH);
-    if (!resp.ok) throw new Error('Fichier prices.json introuvable');
-    const file = await resp.json();
-    pricesSha = file.sha;
-    currentPrices = JSON.parse(atob(file.content));
+    // Load prices from the static file first (always works)
+    const localResp = await fetch('prices.json?v=' + Date.now());
+    if (!localResp.ok) throw new Error('Fichier prices.json introuvable');
+    currentPrices = await localResp.json();
     renderPricingCards();
     statusEl.textContent = 'Dernière mise à jour : ' + (currentPrices.updated ? new Date(currentPrices.updated).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'inconnue');
+
+    // Also fetch SHA from GitHub API in background (needed for saving)
+    fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + PRICES_PATH)
+      .then(r => r.ok ? r.json() : null)
+      .then(file => { if (file) pricesSha = file.sha; })
+      .catch(() => {});
   } catch (e) {
     statusEl.textContent = 'Erreur : ' + e.message;
     statusEl.className = 'pricing-status error';
