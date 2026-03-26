@@ -491,6 +491,17 @@ nav {
 }
 .tarif-btn:hover { border-color:rgba(200,168,75,0.5); color:var(--gold2); }
 .tarif.star .tarif-btn:hover { background:none; color:var(--gold2); }
+.paypal-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+  width:100%; margin-top:0.7rem;
+  font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase;
+  padding:0.8rem; border:1px solid rgba(200,168,75,0.3); color:var(--gold2);
+  background:rgba(200,168,75,0.06); cursor:pointer;
+  font-family:'Raleway',sans-serif; font-weight:300;
+  text-align:center; transition:all 0.3s; border-radius:0;
+}
+.paypal-btn:hover { background:rgba(200,168,75,0.13); border-color:rgba(200,168,75,0.55); color:var(--gold3); }
+.paypal-btn svg { width:16px; height:16px; flex-shrink:0; }
 
 /* ── TÉMOIGNAGES ── */
 #temoignages {
@@ -1324,6 +1335,16 @@ footer {
         <li data-i18n="t1_f3">Retour après séance</li>
       </ul>
       <button type="button" data-cal-link="ferreira-tony-niw1yi/secret" data-cal-namespace="harmony" data-cal-config='{"layout":"month_view","theme":"dark"}' class="tarif-btn" data-i18n="btn_reserver">Réserver</button>
+      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+        <input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="business" value="tonydegois@hotmail.com">
+        <input type="hidden" name="item_name" value="Séance à distance — Harmony Flux">
+        <input type="hidden" name="amount" value="35">
+        <input type="hidden" name="currency_code" value="EUR">
+        <input type="hidden" name="return" value="https://phm045.github.io/harmony-flux/#tarifs">
+        <input type="hidden" name="cancel_return" value="https://phm045.github.io/harmony-flux/#tarifs">
+        <button type="submit" class="paypal-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.23A.77.77 0 0 1 5.703 1.6h6.317c2.1 0 3.574.457 4.378 1.358.775.87.96 2.114.55 3.7l-.01.045v.39l.305.173c.258.137.464.3.624.493.266.32.436.725.504 1.205.07.495.035 1.083-.104 1.747-.16.763-.42 1.426-.773 1.968a4.066 4.066 0 0 1-1.2 1.258 4.922 4.922 0 0 1-1.586.7c-.6.148-1.29.222-2.05.222h-.487a1.47 1.47 0 0 0-1.453 1.245l-.037.19-.617 3.913-.03.137a.151.151 0 0 1-.15.128H7.076z"/><path d="M18.282 6.975c-.014.09-.03.18-.048.273-.63 3.234-2.783 4.352-5.534 4.352h-1.4a.68.68 0 0 0-.671.575l-.717 4.547-.203 1.29a.358.358 0 0 0 .354.414h2.487a.597.597 0 0 0 .59-.505l.024-.126.468-2.968.03-.162a.597.597 0 0 1 .59-.506h.372c2.405 0 4.288-.977 4.838-3.803.23-1.18.11-2.166-.497-2.859a2.37 2.37 0 0 0-.682-.522z" opacity=".7"/></svg><span data-i18n="btn_paypal">Payer par PayPal</span></button>
+      </form>
     </div>
     <div class="tarif reveal" data-tarif-id="domicile">
       <p class="tarif-lbl" data-i18n="t2_lbl">Séance à domicile</p>
@@ -1336,6 +1357,16 @@ footer {
         <li data-i18n="t2_f3">Bilan &amp; conseils</li>
       </ul>
       <button type="button" data-cal-link="ferreira-tony-niw1yi/secret" data-cal-namespace="harmony" data-cal-config='{"layout":"month_view","theme":"dark"}' class="tarif-btn" data-i18n="btn_reserver">Réserver</button>
+      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+        <input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="business" value="tonydegois@hotmail.com">
+        <input type="hidden" name="item_name" value="Séance à domicile — Harmony Flux">
+        <input type="hidden" name="amount" value="50">
+        <input type="hidden" name="currency_code" value="EUR">
+        <input type="hidden" name="return" value="https://phm045.github.io/harmony-flux/#tarifs">
+        <input type="hidden" name="cancel_return" value="https://phm045.github.io/harmony-flux/#tarifs">
+        <button type="submit" class="paypal-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.23A.77.77 0 0 1 5.703 1.6h6.317c2.1 0 3.574.457 4.378 1.358.775.87.96 2.114.55 3.7l-.01.045v.39l.305.173c.258.137.464.3.624.493.266.32.436.725.504 1.205.07.495.035 1.083-.104 1.747-.16.763-.42 1.426-.773 1.968a4.066 4.066 0 0 1-1.2 1.258 4.922 4.922 0 0 1-1.586.7c-.6.148-1.29.222-2.05.222h-.487a1.47 1.47 0 0 0-1.453 1.245l-.037.19-.617 3.913-.03.137a.151.151 0 0 1-.15.128H7.076z"/><path d="M18.282 6.975c-.014.09-.03.18-.048.273-.63 3.234-2.783 4.352-5.534 4.352h-1.4a.68.68 0 0 0-.671.575l-.717 4.547-.203 1.29a.358.358 0 0 0 .354.414h2.487a.597.597 0 0 0 .59-.505l.024-.126.468-2.968.03-.162a.597.597 0 0 1 .59-.506h.372c2.405 0 4.288-.977 4.838-3.803.23-1.18.11-2.166-.497-2.859a2.37 2.37 0 0 0-.682-.522z" opacity=".7"/></svg><span data-i18n="btn_paypal">Payer par PayPal</span></button>
+      </form>
     </div>
     <div class="tarif reveal" data-tarif-id="forfait">
       <p class="tarif-lbl" data-i18n="t3_lbl">Forfait 5 séances</p>
@@ -1348,6 +1379,16 @@ footer {
         <li data-i18n="t3_f3">Valable 3 mois</li>
       </ul>
       <button type="button" data-cal-link="ferreira-tony-niw1yi/secret" data-cal-namespace="harmony" data-cal-config='{"layout":"month_view","theme":"dark"}' class="tarif-btn" data-i18n="btn_reserver">Réserver</button>
+      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+        <input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="business" value="tonydegois@hotmail.com">
+        <input type="hidden" name="item_name" value="Forfait 5 séances — Harmony Flux">
+        <input type="hidden" name="amount" value="180">
+        <input type="hidden" name="currency_code" value="EUR">
+        <input type="hidden" name="return" value="https://phm045.github.io/harmony-flux/#tarifs">
+        <input type="hidden" name="cancel_return" value="https://phm045.github.io/harmony-flux/#tarifs">
+        <button type="submit" class="paypal-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.23A.77.77 0 0 1 5.703 1.6h6.317c2.1 0 3.574.457 4.378 1.358.775.87.96 2.114.55 3.7l-.01.045v.39l.305.173c.258.137.464.3.624.493.266.32.436.725.504 1.205.07.495.035 1.083-.104 1.747-.16.763-.42 1.426-.773 1.968a4.066 4.066 0 0 1-1.2 1.258 4.922 4.922 0 0 1-1.586.7c-.6.148-1.29.222-2.05.222h-.487a1.47 1.47 0 0 0-1.453 1.245l-.037.19-.617 3.913-.03.137a.151.151 0 0 1-.15.128H7.076z"/><path d="M18.282 6.975c-.014.09-.03.18-.048.273-.63 3.234-2.783 4.352-5.534 4.352h-1.4a.68.68 0 0 0-.671.575l-.717 4.547-.203 1.29a.358.358 0 0 0 .354.414h2.487a.597.597 0 0 0 .59-.505l.024-.126.468-2.968.03-.162a.597.597 0 0 1 .59-.506h.372c2.405 0 4.288-.977 4.838-3.803.23-1.18.11-2.166-.497-2.859a2.37 2.37 0 0 0-.682-.522z" opacity=".7"/></svg><span data-i18n="btn_paypal">Payer par PayPal</span></button>
+      </form>
     </div>
   </div>
 </section>
@@ -1640,6 +1681,7 @@ const translations = {
     t2_lbl:'Séance à domicile', t2_u:'10 à 15 min · rayon 20 min de St-Saturnin', t2_f1:'Déplacement inclus', t2_f2:'Soin à votre domicile', t2_f3:'Bilan &amp; conseils',
     t3_lbl:'Forfait 5 séances', t3_u:'soit 36€/séance · −10%', t3_f1:'Présentiel ou distance', t3_f2:'Suivi personnalisé', t3_f3:'Valable 3 mois',
     btn_reserver:'Réserver',
+    btn_paypal:'Payer par PayPal',
     // Témoignages
     avis_tag:'Témoignages', avis_title:'Ils ont <em>ressenti</em>',
     avis_cta_title:'Votre expérience <em>compte</em>',
@@ -1715,6 +1757,7 @@ const translations = {
     t2_lbl:'Home session', t2_u:'10 to 15 min · 20 min radius from St-Saturnin', t2_f1:'Travel included', t2_f2:'Treatment at your home', t2_f3:'Assessment &amp; advice',
     t3_lbl:'5-session package', t3_u:'i.e. 36€/session · −10%', t3_f1:'In-person or remote', t3_f2:'Personalised follow-up', t3_f3:'Valid for 3 months',
     btn_reserver:'Book',
+    btn_paypal:'Pay with PayPal',
     avis_tag:'Testimonials', avis_title:'They have <em>felt it</em>',
     avis_cta_title:'Your experience <em>matters</em>',
     avis_cta_sub:'Have you had a session? Share your experience — every testimonial helps others take the step.',
@@ -1788,6 +1831,7 @@ const translations = {
     t2_lbl:'Sessão ao domicílio', t2_u:'10 a 15 min · raio 20 min de St-Saturnin', t2_f1:'Deslocamento incluído', t2_f2:'Tratamento no seu domicílio', t2_f3:'Balanço &amp; conselhos',
     t3_lbl:'Pack 5 sessões', t3_u:'36€/sessão · −10%', t3_f1:'Presencial ou distância', t3_f2:'Acompanhamento personalizado', t3_f3:'Válido 3 meses',
     btn_reserver:'Reservar',
+    btn_paypal:'Pagar com PayPal',
     avis_tag:'Testemunhos', avis_title:'Eles <em>sentiram</em>',
     avis_cta_title:'A sua experiência <em>conta</em>',
     avis_cta_sub:'Beneficiou de uma sessão? Partilhe a sua experiência — cada testemunho ajuda outras pessoas a dar o passo.',
@@ -2156,6 +2200,10 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
         const subtitleEl = card.querySelector('[data-tarif-subtitle]');
         if (priceEl && t.price) priceEl.textContent = t.price;
         if (subtitleEl && t.subtitle) subtitleEl.textContent = t.subtitle;
+        if (t.price) {
+          const amountInput = card.querySelector('input[name="amount"]');
+          if (amountInput) amountInput.value = t.price.replace(/[^0-9.,]/g,'').replace(',','.');
+        }
       });
     })
     .catch(()=>{});
