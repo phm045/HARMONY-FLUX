@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "prenom": "Sophie",
+    "ville": "Avignon",
+    "note": 5,
+    "soin": "stress",
+    "modalite": "presentiel",
+    "texte": "Une séance incroyablement apaisante. En moins de 15 minutes, j'ai ressenti une légèreté que je n'avais plus depuis des mois. Je recommande vivement !",
+    "date": "2025-02-14"
+  },
+  {
+    "id": 2,
+    "prenom": "Marc",
+    "ville": "Le Pontet",
+    "note": 5,
+    "soin": "douleur",
+    "modalite": "presentiel",
+    "texte": "Je souffrais de migraines chroniques. Après deux séances, la fréquence a nettement diminué. Tony a un don réel. Merciiiii",
+    "date": "2025-01-28"
+  },
+  {
+    "id": 3,
+    "prenom": "Isabelle",
+    "ville": "Lyon",
+    "note": 5,
+    "soin": "global",
+    "modalite": "distance",
+    "texte": "Sceptique au départ, j'ai tenté la séance à distance. Le résultat m'a vraiment surprise, une chaleur bienfaisante et un calme profond dès la fin de l'appel. À bientôt",
+    "date": "2025-03-05"
+  }
+]

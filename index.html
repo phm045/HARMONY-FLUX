@@ -1920,53 +1920,40 @@ function t(key) {
 })();
 </script>
 
-<!-- ═══ LOGIQUE TÉMOIGNAGES (Google Sheets Backend) ═══ -->
+<!-- ═══ LOGIQUE TÉMOIGNAGES (JSON statique + Web3Forms) ═══ -->
 <script>
-// ══════════════════════════════════════════════════════════════
-// IMPORTANT : Remplacez cette URL par celle de votre déploiement
-// Google Apps Script (voir google-apps-script.js pour les instructions)
-// ══════════════════════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'VOTRE_URL_APPS_SCRIPT_ICI';
+// Clé Web3Forms pour l'envoi des témoignages par email
+const W3F_KEY = '2563878c-1640-4873-a39a-6bb8fd861893';
 
-// Cache local pour éviter de recharger à chaque affichage
-const CACHE_KEY = 'harmonyflux_temoignages_cache';
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-function loadTemoignagesFromCache() {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const cached = JSON.parse(raw);
-    if (Date.now() - cached.timestamp > CACHE_TTL) return null;
-    return cached.data;
-  } catch(e) { return null; }
-}
-
-function saveTemoignagesToCache(data) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-  } catch(e) {}
-}
-
+// Chargement des témoignages depuis le fichier JSON statique
 async function fetchTemoignages() {
   try {
-    const res = await fetch(APPS_SCRIPT_URL);
-    const json = await res.json();
-    if (json.success && json.temoignages) {
-      saveTemoignagesToCache(json.temoignages);
-      return json.temoignages;
-    }
-    return loadTemoignagesFromCache() || [];
+    const res = await fetch('temoignages.json?v=' + Date.now());
+    if (!res.ok) return [];
+    return await res.json();
   } catch(e) {
-    return loadTemoignagesFromCache() || [];
+    return [];
   }
 }
 
+// Envoi d'un nouveau témoignage via Web3Forms (email)
 async function submitTemoignage(data) {
-  const res = await fetch(APPS_SCRIPT_URL, {
+  const payload = {
+    access_key: W3F_KEY,
+    subject: '✨ Nouveau témoignage Harmony Flux — ' + data.prenom,
+    from_name: 'Harmony Flux - Témoignages',
+    botcheck: '',
+    note: data.note + ' / 5',
+    prenom: data.prenom,
+    ville: data.ville || '(non renseignée)',
+    soin: data.soin || '(non renseigné)',
+    modalite: data.modalite || '(non renseignée)',
+    temoignage: data.texte
+  };
+  const res = await fetch('https://api.web3forms.com/submit', {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(data)
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload)
   });
   return await res.json();
 }
@@ -1990,23 +1977,14 @@ function badgeLabel(soin, modalite) {
 async function renderTemoignages() {
   const container = document.getElementById('temoignages-liste');
   if (!container) return;
-
-  // Essayer le cache d'abord pour un affichage rapide
-  let list = loadTemoignagesFromCache();
-  if (list) {
-    renderTemoignagesList(list);
-  }
-
-  // Puis charger depuis le serveur en arrière-plan
-  const freshList = await fetchTemoignages();
-  renderTemoignagesList(freshList);
+  const list = await fetchTemoignages();
+  renderTemoignagesList(list);
 }
 
 function renderTemoignagesList(list) {
   const container = document.getElementById('temoignages-liste');
   if (!container) return;
 
-  // Mise à jour de la moyenne
   const moyDiv = document.getElementById('temoignages-moyenne');
   const moyStars = document.getElementById('moyenne-stars');
   const moyLabel = document.getElementById('moyenne-label');
@@ -2045,7 +2023,6 @@ function renderTemoignagesList(list) {
     </div>`;
   }).join('');
 
-  // Relancer les animations reveal sur les nouvelles cartes
   container.querySelectorAll('.reveal:not(.in)').forEach((el, i) => {
     setTimeout(() => el.classList.add('in'), i * 80 + 100);
   });
@@ -2086,7 +2063,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Soumission du formulaire — envoi vers Google Sheets
+// Soumission du formulaire — envoi par email via Web3Forms
 document.getElementById('avis-submit').addEventListener('click', async function() {
   const errEl = document.getElementById('avis-error');
   const submitBtn = document.getElementById('avis-submit');
@@ -2102,7 +2079,6 @@ document.getElementById('avis-submit').addEventListener('click', async function(
   if (!prenom) { errEl.textContent = t('avis_erreur_prenom'); errEl.style.display = 'block'; return; }
   if (!texte) { errEl.textContent = t('avis_erreur_texte'); errEl.style.display = 'block'; return; }
 
-  // Désactiver le bouton pendant l'envoi
   submitBtn.disabled = true;
   submitBtn.style.opacity = '0.5';
   submitBtn.style.cursor = 'wait';
@@ -2111,15 +2087,11 @@ document.getElementById('avis-submit').addEventListener('click', async function(
     const result = await submitTemoignage({ prenom, ville, note: selectedNote, soin, modalite, texte });
 
     if (result.success) {
-      // Vider le cache pour forcer un rechargement
-      localStorage.removeItem(CACHE_KEY);
-
-      // Afficher le succès
       document.getElementById('avis-form-wrap').style.display = 'none';
       document.getElementById('avis-success').style.display = 'block';
       document.getElementById('avis-success').style.animation = 'modalIn 0.4s ease both';
     } else {
-      errEl.textContent = result.error || 'Une erreur est survenue. Veuillez réessayer.';
+      errEl.textContent = 'Une erreur est survenue. Veuillez réessayer.';
       errEl.style.display = 'block';
     }
   } catch(e) {
