@@ -1,0 +1,20 @@
+name = "harmony-flux-moderation"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# KV namespace pour stocker les avis en attente et le rate-limit
+# Créer avec : wrangler kv:namespace create MOD_KV
+[[kv_namespaces]]
+binding = "MOD_KV"
+id = "REMPLACER_PAR_ID_KV"
+
+[vars]
+GITHUB_REPO = "phm045/harmony-flux"
+GITHUB_BRANCH = "main"
+TEMOIGNAGES_PATH = "temoignages.json"
+ALLOWED_ORIGIN = "https://phm045.github.io"
+
+# Secrets à définir séparément (ne PAS les mettre ici) :
+#   wrangler secret put GITHUB_TOKEN
+#   wrangler secret put ADMIN_TOKEN
+#   wrangler secret put TURNSTILE_SECRET
