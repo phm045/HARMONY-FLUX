@@ -1641,8 +1641,18 @@ body::after {
             <span class="pricing-status" id="tem-status"></span>
           </div>
         </div>
+        <!-- Pending moderation queue (Cloudflare Worker) -->
+        <div id="tem-pending-section" style="margin-top:2rem;">
+          <h4 style="font-family:'Cormorant',serif;font-size:1.1rem;color:var(--gold2);margin-bottom:1rem;">Avis en attente de modération <span id="tem-pending-count" style="color:var(--muted2);font-weight:300;font-size:0.9rem;"></span></h4>
+          <div id="tem-pending-status" class="pricing-status" style="margin-bottom:0.6rem;"></div>
+          <div id="tem-pending-list"></div>
+          <div style="margin-top:0.8rem;">
+            <button class="action-btn" onclick="loadPendingTemoignages()" style="background:var(--moss);color:var(--cream);"><span class="btn-label">Rafraîchir la file</span></button>
+          </div>
+        </div>
         <!-- List of existing testimonials -->
-        <div id="tem-list" style="margin-top:2rem;"></div>
+        <h4 style="font-family:'Cormorant',serif;font-size:1.1rem;color:var(--gold2);margin:2rem 0 1rem;">Avis publiés sur le site</h4>
+        <div id="tem-list" style="margin-top:0.5rem;"></div>
       </div>
     </div>
 
@@ -2600,8 +2610,42 @@ savePrices = async function() {
    ═══════════════════════════════════════ */
 
 const TEMOIGNAGES_PATH = 'temoignages.json';
+// URL du Worker Cloudflare de modération (à remplacer après déploiement)
+const WORKER_URL = 'https://harmony-flux-moderation.example.workers.dev';
 let currentTemoignages = [];
 let temoignagesSha = null;
+
+/* ----- Admin token (Cloudflare Worker) ----- */
+function getAdminToken() {
+  return localStorage.getItem('hf_admin_token') || '';
+}
+function setAdminToken(token) {
+  localStorage.setItem('hf_admin_token', token);
+}
+function promptAdminToken() {
+  const t = prompt('Entrez le ADMIN_TOKEN du Worker Cloudflare (généré lors du déploiement). Il sera mémorisé localement.');
+  if (!t) return '';
+  const trimmed = t.trim();
+  setAdminToken(trimmed);
+  return trimmed;
+}
+async function workerFetch(path, opts) {
+  let token = getAdminToken();
+  if (!token) token = promptAdminToken();
+  if (!token) throw new Error('ADMIN_TOKEN requis');
+  opts = opts || {};
+  opts.headers = Object.assign({
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }, opts.headers || {});
+  const res = await fetch(WORKER_URL + path, opts);
+  if (res.status === 401) {
+    localStorage.removeItem('hf_admin_token');
+    throw new Error('Token invalide — veuillez le ressaisir');
+  }
+  return res;
+}
 
 function toggleTemoignagesEditor() {
   const body = document.getElementById('temoignages-body');
@@ -2610,9 +2654,89 @@ function toggleTemoignagesEditor() {
     body.style.display = '';
     toggle.classList.add('open');
     loadTemoignagesAdmin();
+    loadPendingTemoignages();
   } else {
     body.style.display = 'none';
     toggle.classList.remove('open');
+  }
+}
+
+/* ----- File de modération (Worker) ----- */
+async function loadPendingTemoignages() {
+  const statusEl = document.getElementById('tem-pending-status');
+  const listEl = document.getElementById('tem-pending-list');
+  const countEl = document.getElementById('tem-pending-count');
+  statusEl.textContent = 'Chargement de la file…';
+  statusEl.className = 'pricing-status';
+  try {
+    const res = await workerFetch('/pending', { method: 'GET' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const items = data.items || [];
+    countEl.textContent = items.length ? '· ' + items.length + ' en attente' : '';
+    if (items.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--muted2);font-size:0.85rem;">Aucun avis en attente.</p>';
+      statusEl.textContent = '';
+      return;
+    }
+    const soinMap = { global:'Soin Global', douleur:'Douleurs', stress:'Stress', blocage:'Blocages', enfant:'Enfant', suivi:'Suivi' };
+    listEl.innerHTML = items.map(it => {
+      const stars = '★'.repeat(it.note) + '☆'.repeat(5 - it.note);
+      const meta = [soinMap[it.soin] || '', it.modalite === 'distance' ? 'Distance' : (it.modalite === 'presentiel' ? 'Présentiel' : ''), (it.submitted_at || '').slice(0, 10)].filter(Boolean).join(' · ');
+      const safeId = escapeHtml(it.id);
+      return '<div class="tem-card" style="border-left:3px solid var(--gold2);">'
+        + '<div class="tem-card-content">'
+        +   '<div class="tem-card-name">' + escapeHtml(it.prenom) + (it.ville ? ' <span>· ' + escapeHtml(it.ville) + '</span>' : '') + '</div>'
+        +   '<div class="tem-card-stars">' + stars + '</div>'
+        +   '<div class="tem-card-text">' + escapeHtml(it.texte) + '</div>'
+        +   '<div class="tem-card-meta">' + escapeHtml(meta) + '</div>'
+        + '</div>'
+        + '<div class="tem-card-actions" style="display:flex;flex-direction:column;gap:0.4rem;">'
+        +   '<button class="action-btn btn-complete" onclick="approveTemoignage(\'' + safeId + '\')"><span class="btn-label">Approuver</span></button>'
+        +   '<button class="tem-delete-btn" onclick="rejectTemoignage(\'' + safeId + '\')">Rejeter</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+    statusEl.textContent = '';
+  } catch(e) {
+    statusEl.textContent = 'Erreur : ' + e.message;
+    statusEl.className = 'pricing-status error';
+  }
+}
+
+async function approveTemoignage(id) {
+  const statusEl = document.getElementById('tem-pending-status');
+  statusEl.textContent = 'Approbation en cours…';
+  statusEl.className = 'pricing-status';
+  try {
+    const res = await workerFetch('/approve', { method: 'POST', body: JSON.stringify({ id }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    statusEl.textContent = 'Avis approuvé et publié.';
+    statusEl.className = 'pricing-status success';
+    await loadPendingTemoignages();
+    await loadTemoignagesAdmin();
+  } catch(e) {
+    statusEl.textContent = 'Erreur : ' + e.message;
+    statusEl.className = 'pricing-status error';
+  }
+}
+
+async function rejectTemoignage(id) {
+  if (!confirm('Rejeter et supprimer cet avis ?')) return;
+  const statusEl = document.getElementById('tem-pending-status');
+  statusEl.textContent = 'Suppression…';
+  statusEl.className = 'pricing-status';
+  try {
+    const res = await workerFetch('/reject', { method: 'POST', body: JSON.stringify({ id }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    statusEl.textContent = 'Avis rejeté.';
+    statusEl.className = 'pricing-status success';
+    await loadPendingTemoignages();
+  } catch(e) {
+    statusEl.textContent = 'Erreur : ' + e.message;
+    statusEl.className = 'pricing-status error';
   }
 }
 
