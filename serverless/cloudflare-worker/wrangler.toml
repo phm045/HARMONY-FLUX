@@ -13,6 +13,19 @@ ALLOWED_ORIGIN = "https://phm045.github.io"
 ADMIN_EMAIL    = "tonydegois84@gmail.com"
 SESSION_TTL_SECONDS = "28800"
 
+# ─── Environnement "production" — requis par Cloudflare Workers Builds ───
+# Le pipeline Workers Builds déploie via `wrangler deploy --env=production`.
+# Sans cette section, wrangler émet un warning qui peut être traité comme
+# erreur par le builder. Les [vars] top-level ne sont PAS héritées par les
+# environnements nommés : on les duplique explicitement ci-dessous.
+[env.production.vars]
+REPO_OWNER     = "phm045"
+REPO_NAME      = "harmony-flux"
+REPO_BRANCH    = "main"
+ALLOWED_ORIGIN = "https://phm045.github.io"
+ADMIN_EMAIL    = "tonydegois84@gmail.com"
+SESSION_TTL_SECONDS = "28800"
+
 # ─── Secrets — JAMAIS commités, à poser via `wrangler secret put …` ──────
 #   wrangler secret put GITHUB_TOKEN          # PAT fine-grained, Contents:RW
 #   wrangler secret put ADMIN_SHARED_SECRET   # ex: openssl rand -base64 32
