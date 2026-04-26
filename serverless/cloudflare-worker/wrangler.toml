@@ -1,6 +1,7 @@
 name = "harmony-flux-temoignages"
 main = "worker.js"
 compatibility_date = "2025-09-01"
+account_id = "0861f9976bfa9b47c5f96cc61357f08d"
 
 # Variables non secrètes — éditables ici. Les secrets (GITHUB_TOKEN,
 # ADMIN_SHARED_SECRET) doivent être définis via :

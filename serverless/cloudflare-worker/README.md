@@ -38,6 +38,7 @@ wrangler secret put ADMIN_SHARED_SECRET   # ex: openssl rand -base64 32
 
 # Variables non secrètes — déjà dans wrangler.toml,
 # à ajuster si vous changez de repo.
+# (account_id Cloudflare déjà renseigné dans wrangler.toml.)
 
 wrangler deploy
 ```
